@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  description: This API provides audit info
+  version: "1.0.0"
+  title: Audit API
+  contact:
+    email: slim107@my.bcit.ca
+
+paths:
+  /final_grade:
+    get:
+      summary: gets a final grade event from history
+      operationId: app.get_final_grade_event
+      description: Gets final grade events from the event store
+      parameters:
+        - name: index
+          in: query
+          description: Gets the final grade at the index in the event store
+          schema:
+            type: integer
+            example: 92
+      responses:
+        '200':
+          description: Successfully returned a final grade events
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/FinalGradeEvent'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /classes:
+    get:
+      summary: gets a class event from history
+      operationId: app.get_classes_event
+      description: Gets classes event from the event store
+      parameters:
+        - name: index
+          in: query
+          description: Gets the classes at the index in the event store
+          schema:
+            type: integer
+            example: 92
+      responses:
+        '200':
+          description: Successfully returned a classes event
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/ClassesEvent'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Not Found
+
+
+components:
+  schemas:
+    FinalGradeEvent:
+      type: object
+      required:
+        - fullname
+        - username
+        - password
+        - final_grade
+        - timestamp
+      properties:
+        fullname:
+          type: string
+          example: john kim
+        username:
+          type: string
+          example: john123123
+        password:
+          type: string
+          example: q1w2e3r4
+        final_grade:
+          type: integer
+          example: 95
+        timestamp:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001
+    ClassesEvent:
+      required:
+        - fullname
+        - username
+        - password
+        - classes
+      properties:
+        fullname:
+          type: string
+          example: Sean lim
+        username:
+          type: string
+          example: sushi123
+        password:
+          type: string
+          example: 123123qwer
+        classes:
+          $ref: '#/components/schemas/Classes'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001
+    Classes:
+      required:
+        - math
+        - python
+      properties:
+        math:
+          type: string
+          example: MATH3800
+        python:
+          type: string
+          example: ACIT2512
+      type: object
