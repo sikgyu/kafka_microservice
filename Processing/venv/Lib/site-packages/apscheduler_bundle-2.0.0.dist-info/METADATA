@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: apscheduler-bundle
+Version: 2.0.0
+Summary: APScheduler support for applauncher
+License: Apache
+Author: Alvaro Garcia
+Author-email: maxpowel@gmail.com
+Requires-Python: >=3.6,<4.0
+Classifier: License :: Other/Proprietary License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Dist: APScheduler (>=3.7.0,<4.0.0)
+Requires-Dist: applauncher (>=2.0.2,<3.0.0)
