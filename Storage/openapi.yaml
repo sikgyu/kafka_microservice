@@ -1,0 +1,193 @@
+openapi: 3.0.0
+info:
+  description: This API receives User information when the user created new account
+  version: "1.0.0"
+  title: User account registration API
+  contact:
+    email: slim107@my.bcit.ca
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: user account
+    description: user created new account as student or instructor
+paths:
+  /account/student:
+    post:
+      tags:
+        - user account
+      summary: user created as student
+      operationId: app.student_account
+      description: Adds a new student account information to the system
+      responses:
+        '201':
+          description: student account created
+        '400':
+          description: 'invalid input, object invalid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+        description: account to add
+    get:
+      tags:
+        - user account
+      summary: gets new student account
+      operationId: app.get_student_account
+      description: Gets a new student account information to the system added after a timestamp
+      parameters:
+        - name: start_timestamp
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: 2016-06-29T09:12:33.001
+        - name: end_timestamp
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: 2016-08-29T09:12:33.001
+      responses:
+        '200':
+          description: Successfully returned a list of student account events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /account/instructor:
+    post:
+      tags:
+        - user account
+      summary: account created as instructor
+      operationId: app.instructor_account
+      description: Adds an instructor account information to the system
+      responses:
+        '201':
+          description: instructor account created
+        '400':
+          description: 'invalid input, object invalid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Instructor'
+        description: account to add
+    get:
+      tags:
+        - user account
+      summary: gets new instructor account
+      operationId: app.get_instructor_account
+      description: Gets a new instructor account information to the system added after a timestamp
+      parameters:
+        - name: start_timestamp
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: 2016-06-29T09:12:33.001
+        - name: end_timestamp
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: 2016-08-29T09:12:33.001
+      responses:
+        '200':
+          description: Successfully returned a list of student account events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instructor'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+components:
+  schemas:
+    Student:
+      type: object
+      required:
+        - fullname
+        - username
+        - password
+        - final_grade
+        - timestamp
+      properties:
+        fullname:
+          type: string
+          example: john kim
+        username:
+          type: string
+          example: john123123
+        password:
+          type: string
+          example: q1w2e3r4
+        final_grade:
+          type: integer
+          example: 95
+        timestamp:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001
+
+    Instructor:
+      required:
+        - fullname
+        - username
+        - password
+        - classes
+      properties:
+        fullname:
+          type: string
+          example: Sean lim
+        username:
+          type: string
+          example: sushi123
+        password:
+          type: string
+          example: 123123qwer
+        classes:
+          $ref: '#/components/schemas/Classes'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001
+
+
+    Classes:
+      required:
+        - math
+        - python
+      properties:
+        math:
+          type: string
+          example: MATH3800
+        python:
+          type: string
+          example: ACIT2512
+      type: object
