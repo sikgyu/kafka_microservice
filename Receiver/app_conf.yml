@@ -1,0 +1,9 @@
+version: 1
+eventstore1:
+  url: http://localhost:8090/account/student
+eventstore2:
+  url: http://localhost:8090/account/instructor
+events:
+  hostname: sean-kafka.eastus2.cloudapp.azure.com
+  port: 9092
+  topic: events
