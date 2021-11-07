@@ -1,8 +1,6 @@
 import connexion
 from pykafka import KafkaClient
 from flask import Flask
-from flask_cors import CORS
-
 import logging.config
 import yaml
 import json
@@ -76,6 +74,8 @@ def get_classes_event(index):
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')
+CORS(app.app)
+app.app.config['CORS_HEADERS'] = 'Content-Type'
 app.add_api("openapi.yaml",
             strict_validation=True,
             validate_responses=True)

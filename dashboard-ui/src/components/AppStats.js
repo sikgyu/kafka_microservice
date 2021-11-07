@@ -43,10 +43,10 @@ export default function AppStats() {
 							<td># Instructor: {stats['num_in_events']}</td>
 						</tr>
 						<tr>
-							<td colspan="2">Highest Score: {stats['max_bp_sys_reading']}</td>
+							<td colspan="2">Highest Score: {stats['highest_score']}</td>
 						</tr>
 						<tr>
-							<td colspan="2">Lowest Score: {stats['max_bp_dia_reading']}</td>
+							<td colspan="2">Lowest Score: {stats['lowest_score']}</td>
 						</tr>
 					</tbody>
                 </table>
