@@ -9,6 +9,7 @@ from os import path
 import requests
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask_cors import CORS, cross_origin
 
 from connexion import NoContent
 

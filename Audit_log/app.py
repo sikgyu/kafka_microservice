@@ -6,6 +6,7 @@ from flask_cors import CORS
 import logging.config
 import yaml
 import json
+from flask_cors import CORS, cross_origin
 
 with open('app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())

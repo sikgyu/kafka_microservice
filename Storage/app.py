@@ -134,7 +134,6 @@ def process_messages():
         msg = json.loads(msg_str)
         logger.info("Message: %s" % msg)
         payload = msg['payload']
-
         if msg["type"] == 'final_grade':
             student_account(payload)
         elif msg['type'] == 'classes':
