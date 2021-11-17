@@ -32,6 +32,7 @@ with open('log_conf.yml', 'r') as f:
     logger.info('Connecting to DB. Hostname: {}, Port: {}'.format(app_config['datastore']['hostname'],
                                                                   app_config['datastore']['port']))
 
+
 def student_account(body):
     """ Receives a student account log """
 
@@ -49,7 +50,8 @@ def student_account(body):
     session.close()
 
     username = body['username']
-    logger.debug('Stored event student account request with a unique id of {}'.format(username))
+    logger.debug(
+        'Stored event student account request with a unique id of {}'.format(username))
 
     return NoContent, 201
 
@@ -71,7 +73,8 @@ def instructor_account(body):
     session.close()
 
     username = body['username']
-    logger.debug('Stored event instructor account request with a unique id of {}'.format(username))
+    logger.debug(
+        'Stored event instructor account request with a unique id of {}'.format(username))
 
     return NoContent, 201
 
@@ -80,8 +83,10 @@ def get_student_account(start_timestamp, end_timestamp):
     """ Gets new student account events after the timestamp """
     session = DB_SESSION()
 
-    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
-    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
+    start_timestamp_datetime = datetime.datetime.strptime(
+        start_timestamp, "%Y-%m-%dT%H:%M:%S")
+    end_timestamp_datetime = datetime.datetime.strptime(
+        end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
     students = session.query(StudentAccount).filter(
         and_(StudentAccount.date_created >= start_timestamp_datetime,
@@ -101,8 +106,10 @@ def get_student_account(start_timestamp, end_timestamp):
 def get_instructor_account(start_timestamp, end_timestamp):
     """ Gets new instructor account events after the timestamp """
     session = DB_SESSION()
-    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
-    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
+    start_timestamp_datetime = datetime.datetime.strptime(
+        start_timestamp, "%Y-%m-%dT%H:%M:%S")
+    end_timestamp_datetime = datetime.datetime.strptime(
+        end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
     students = session.query(InstructorAccount).filter(
         and_(InstructorAccount.date_created >= start_timestamp_datetime,
@@ -118,6 +125,7 @@ def get_instructor_account(start_timestamp, end_timestamp):
 
     return results_list, 200
 
+
 def process_messages():
     """ Process event messages """
     logger.info("process messages.")
@@ -125,21 +133,27 @@ def process_messages():
                           app_config["events"]["port"])
     client = KafkaClient(hosts=hostname)
     topic = client.topics[str.encode(app_config["events"]["topic"])]
-
-    consumer = topic.get_simple_consumer(consumer_group=b'event_group',
-                                         reset_offset_on_start=False,
-                                         auto_offset_reset=OffsetType.LATEST)
-    for msg in consumer:
-        msg_str = msg.value.decode('utf-8')
-        msg = json.loads(msg_str)
-        logger.info("Message: %s" % msg)
-        payload = msg['payload']
-        if msg["type"] == 'final_grade':
-            student_account(payload)
-        elif msg['type'] == 'classes':
-            instructor_account(payload)
-        consumer.commit_offsets()
-
+    count = 0
+    retry = 10
+    while count < retry:
+        try:
+            consumer = topic.get_simple_consumer(consumer_group=b'event_group',
+                                                 reset_offset_on_start=False,
+                                                 auto_offset_reset=OffsetType.LATEST)
+            for msg in consumer:
+                msg_str = msg.value.decode('utf-8')
+                msg = json.loads(msg_str)
+                logger.info("Message: %s" % msg)
+                payload = msg['payload']
+                if msg["type"] == 'final_grade':
+                    student_account(payload)
+                elif msg['type'] == 'classes':
+                    instructor_account(payload)
+                consumer.commit_offsets()
+        except:
+            logger.error('lost connection. (%d)' % count)
+            count += 1
+            time.sleep(app_config["events"]["period_sec"])
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')

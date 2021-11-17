@@ -6,6 +6,9 @@ services:
     ports:
       - "2181"
     hostname: zookeeper
+    # create directory /home/<username>/zookeeper/data
+    volumes:
+      - /home/azureuser/zookeeper/data:/opt/zookeeper-3.4.13/data
   kafka:
     image: wurstmeister/kafka
     command: [start-kafka.sh]
@@ -22,6 +25,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      # create /home/<username>/kafka
+      - /home/azureuser/kafka:/kafka/kafka-logs
     depends_on:
       - "zookeeper"
   db:
