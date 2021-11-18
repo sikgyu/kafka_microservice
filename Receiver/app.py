@@ -37,7 +37,7 @@ while count < retry:
         break
     except:
         logger.error("Lost connection. (%d)" % count)
-        time.sleep(app_config["event"]["period_sec"])
+        time.sleep(app_config["events"]["period_sec"])
         count += 1
 
 
