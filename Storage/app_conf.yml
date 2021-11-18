@@ -9,3 +9,4 @@ events:
  hostname: sean-kafka.eastus2.cloudapp.azure.com
  port: 9092
  topic: events
+ period_sec: 5

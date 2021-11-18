@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import and_
 import datetime
 import json
+import time
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
 from threading import Thread
