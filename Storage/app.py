@@ -129,19 +129,23 @@ def get_instructor_account(start_timestamp, end_timestamp):
 
 def process_messages():
     """ Process event messages """
+    hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
     logger.info("process messages.")
-    hostname = "%s:%d" % (app_config["events"]["hostname"],
-                          app_config["events"]["port"])
-    client = KafkaClient(hosts=hostname)
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
     count = 0
     retry = 10
     while count < retry:
         try:
-            consumer = topic.get_simple_consumer(consumer_group=b'event_group',
-                                                 reset_offset_on_start=False,
-                                                 auto_offset_reset=OffsetType.LATEST)
-            for msg in consumer:
+            logger.info("Connecting...")
+            client = KafkaClient(hosts=hostname)
+        except:
+            logger.error('lost connection. (%d)' % count)
+            count += 1
+            time.sleep(app_config["events"]["period_sec"])
+    topic = client.topics[str.encode(app_config["events"]["topic"])]
+    consumer = topic.get_simple_consumer(consumer_group=b'event_group',
+                                            reset_offset_on_start=False,
+                                            auto_offset_reset=OffsetType.LATEST)
+    for msg in consumer:
                 msg_str = msg.value.decode('utf-8')
                 msg = json.loads(msg_str)
                 logger.info("Message: %s" % msg)
@@ -151,14 +155,10 @@ def process_messages():
                 elif msg['type'] == 'classes':
                     instructor_account(payload)
                 consumer.commit_offsets()
-        except:
-            logger.error('lost connection. (%d)' % count)
-            count += 1
-            time.sleep(app_config["events"]["period_sec"])
-
 
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
+
 if __name__ == "__main__":
     t1 = Thread(target=process_messages)
     t1.setDaemon(True)
