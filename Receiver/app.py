@@ -22,6 +22,25 @@ with open('log_conf.yml', 'r') as f:
 logger = logging.getLogger('basicLogger')
 
 
+retry = 10
+count = 0
+
+while count < retry:
+    try:
+        logger.info("Connecting...")
+        hostname = "%s: %d" % (
+            app_config["events"]["hostname"], app_config["events"]["port"])
+        client = KafkaClient(hosts=hostname)
+        topic = client.topics[str.encode(app_config["events"]["topic"])]
+
+        producer = topic.get_sync_producer()
+        break
+    except:
+        logger.error("Lost connection. (%d)" % count)
+        time.sleep(app_config["event"]["period_sec"])
+        count += 1
+
+
 def student_account(body):
     """ Receives a creating free account event """
     username = body['username']
