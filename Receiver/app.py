@@ -53,7 +53,7 @@ def student_account(body):
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     producer = topic.get_sync_producer()
     msg = {"type": "final_grade",
-           "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+           "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
            "payload": body
            }
     msg_str = json.dumps(msg)
