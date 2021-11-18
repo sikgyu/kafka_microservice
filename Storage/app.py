@@ -15,6 +15,7 @@ import time
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
 from threading import Thread
+import sys
 
 with open('app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())
@@ -133,28 +134,37 @@ def process_messages():
     logger.info("process messages.")
     count = 0
     retry = 10
-    while count < retry:
+    connected = False
+    client = None
+
+    while not connected and count < retry:
         try:
-            logger.info("Connecting...")
+            logger.info("Connecting... (%d)" % count)
             client = KafkaClient(hosts=hostname)
+            connected = True
         except:
             logger.error('lost connection. (%d)' % count)
             count += 1
             time.sleep(app_config["events"]["period_sec"])
+    if not connected:
+        logger.critical("CANNOT CONNECT TO KAFKA. EXITING...")
+        sys.exit(0)
+
+
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(consumer_group=b'event_group',
                                             reset_offset_on_start=False,
                                             auto_offset_reset=OffsetType.LATEST)
     for msg in consumer:
-                msg_str = msg.value.decode('utf-8')
-                msg = json.loads(msg_str)
-                logger.info("Message: %s" % msg)
-                payload = msg['payload']
-                if msg["type"] == 'final_grade':
-                    student_account(payload)
-                elif msg['type'] == 'classes':
-                    instructor_account(payload)
-                consumer.commit_offsets()
+        msg_str = msg.value.decode('utf-8')
+        msg = json.loads(msg_str)
+        logger.info("Message: %s" % msg)
+        payload = msg['payload']
+        if msg["type"] == 'final_grade':
+            student_account(payload)
+        elif msg['type'] == 'classes':
+            instructor_account(payload)
+        consumer.commit_offsets()
 
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
