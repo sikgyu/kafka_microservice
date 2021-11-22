@@ -46,12 +46,6 @@ def student_account(body):
     username = body['username']
     logger.info(
         'Received event student account request with a unique id of {}'.format(username))
-
-    hostname = "%s:%d" % (
-        app_config["events"]["hostname"], app_config["events"]["port"])
-    client = KafkaClient(hosts=hostname)
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    producer = topic.get_sync_producer()
     msg = {"type": "final_grade",
            "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
            "payload": body
@@ -73,12 +67,6 @@ def instructor_account(body):
     username = body['username']
     logger.info(
         'Received event instructor account request with a unique id of {}'.format(username))
-
-    hostname = "%s:%d" % (
-        app_config["events"]["hostname"], app_config["events"]["port"])
-    client = KafkaClient(hosts=hostname)
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    producer = topic.get_sync_producer()
 
     msg = {"type": "classes",
            "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),

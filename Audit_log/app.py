@@ -1,10 +1,11 @@
-import connexion
-from pykafka import KafkaClient
-from flask import Flask
-import logging.config
-import yaml
 import json
+import logging.config
+
+import connexion
+import yaml
+from flask import Flask
 from flask_cors import CORS, cross_origin
+from pykafka import KafkaClient
 
 with open('app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())
