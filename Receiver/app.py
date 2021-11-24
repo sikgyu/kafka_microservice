@@ -61,7 +61,7 @@ def student_account(body):
     logger.info(
         'Received event student account request with a unique id of {}'.format(username))
     msg = {"type": "final_grade",
-           "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+           "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
            "payload": body
            }
     msg_str = json.dumps(msg)
