@@ -47,7 +47,7 @@ def student_account(body):
     logger.info(
         'Received event student account request with a unique id of {}'.format(username))
     msg = {"type": "final_grade",
-           "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+           "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
            "payload": body
            }
     msg_str = json.dumps(msg)
@@ -86,6 +86,7 @@ def instructor_account(body):
 
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml",
+            base_path="/receiver",  
             strict_validation=True,
             validate_responses=True)
 

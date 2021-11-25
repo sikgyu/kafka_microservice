@@ -22,6 +22,7 @@ with open('log_conf.yml', 'r') as f:
 
 logger = logging.getLogger('basicLogger')
 
+
 def get_stats():
     logger.info("get stats request has been started")
     stats = {}
@@ -51,14 +52,14 @@ def get_stats():
     return stats, 200
 
 
-
 def populate_stats():
     """ Periodically update stats """
     logger.info("Start Periodic Processing")
     if os.path.isfile(app_config["datastore"]["filename"]):
         with open('data.json', 'r') as f:
             data_config = json.load(f)
-        logger.info("number of score: {}".format(data_config['num_score_events']))
+        logger.info("number of score: {}".format(
+            data_config['num_score_events']))
         logger.info("highest score: {}".format(data_config['highest_score']))
         logger.info("lowest score: {}".format(data_config['lowest_score']))
     else:
@@ -71,10 +72,12 @@ def populate_stats():
                 "last_updated": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             }
             json.dump(data_config, f, ensure_ascii=False, indent=4)
-        logger.info("number of score: {}".format(data_config['num_score_events']))
+        logger.info("number of score: {}".format(
+            data_config['num_score_events']))
         logger.info("highest score: {}".format(data_config['highest_score']))
         logger.info("lowest score: {}".format(data_config['lowest_score']))
-    logger.info("Current datetime : {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    logger.info("Current datetime : {}".format(
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
     last_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     if "last_updated" in data_config:
@@ -84,9 +87,9 @@ def populate_stats():
 
     current_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     instructor_res = requests.get(app_config["eventstore"][
-                                      "url"] + "/account/instructor?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
+        "url"] + "/account/instructor?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
     student_res = requests.get(app_config["eventstore"][
-                                   "url"] + "/account/student?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
+        "url"] + "/account/student?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
 
     if instructor_res.status_code == 200:
         logger.info("instructor event has been received successfully")
@@ -124,10 +127,14 @@ def init_scheduler():
 
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml",
+            base_path="/processing",
             strict_validation=True,
             validate_responses=True)
-CORS(app.app)
-app.app.config['CORS_HEADERS'] = 'Content-Type'
+
+if "TARGET_ENV" not in os.environ or os.environ["TARGET_ENV"] != "test":
+    CORS(app.app)
+    app.app.config['CORS_HEADERS'] = 'Content-Type'
+
 if __name__ == "__main__":
     init_scheduler()
     app.run(port=8100, use_reloader=False)

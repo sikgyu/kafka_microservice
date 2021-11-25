@@ -130,7 +130,8 @@ def get_instructor_account(start_timestamp, end_timestamp):
 
 def process_messages():
     """ Process event messages """
-    hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+    hostname = "%s:%d" % (
+        app_config["events"]["hostname"], app_config["events"]["port"])
     logger.info("process messages.")
     count = 0
     retry = 10
@@ -150,11 +151,10 @@ def process_messages():
         logger.critical("CANNOT CONNECT TO KAFKA. EXITING...")
         sys.exit(0)
 
-
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(consumer_group=b'event_group',
-                                            reset_offset_on_start=False,
-                                            auto_offset_reset=OffsetType.LATEST)
+                                         reset_offset_on_start=False,
+                                         auto_offset_reset=OffsetType.LATEST)
     for msg in consumer:
         msg_str = msg.value.decode('utf-8')
         msg = json.loads(msg_str)
@@ -166,8 +166,10 @@ def process_messages():
             instructor_account(payload)
         consumer.commit_offsets()
 
+
 app = connexion.FlaskApp(__name__, specification_dir='')
-app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
+app.add_api("openapi.yaml", base_path="/storage",
+            strict_validation=True, validate_responses=True)
 
 if __name__ == "__main__":
     t1 = Thread(target=process_messages)
