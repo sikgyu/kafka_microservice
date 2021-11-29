@@ -1,12 +1,12 @@
 version: 1
 datastore:
- user: user
- password: password
- hostname: sean-kafka.eastus2.cloudapp.azure.com
- port: 3306
- db: events
+  user: user
+  password: password
+  hostname: sean-kafka.eastus2.cloudapp.azure.com
+  port: 3306
+  db: events
 events:
- hostname: sean-kafka.eastus2.cloudapp.azure.com
- port: 9092
- topic: events
- period_sec: 5
+  hostname: sean-kafka.eastus2.cloudapp.azure.com
+  port: 9092
+  topic: events
+  period_sec: 7
