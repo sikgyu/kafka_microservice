@@ -104,7 +104,7 @@ services:
     volumes:
       - /home/azureuser/config/audit_log:/config
       - /home/azureuser/logs:/logs
-  dashboard:
+  dashboard-ui:
     image: dashboard:latest
     ports:
       - "3000"
@@ -124,7 +124,7 @@ services:
       - "storage"
       - "processing"
       - "audit_log"
-      - "dashboard"
+      - "dashboard-ui"
     # Connects the port 80 of the nginx container to localhost:80 or localhost
     ports:
       - "80:80"
