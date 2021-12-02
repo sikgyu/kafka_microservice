@@ -1,7 +1,0 @@
-version: 1
-datastore:
-  filename: data.json
-scheduler:
-  period_sec: 4
-eventstore:
-  url: http://sean-kafka.eastus2.cloudapp.azure.com/storage
