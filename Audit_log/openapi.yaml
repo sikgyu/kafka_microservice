@@ -1,35 +1,43 @@
 openapi: 3.0.0
 info:
-  description: This API provides audit info
-  version: "1.0.0"
-  title: Audit API
+  description: This API receives deliver and pick up orders from an application
+  version: '1.0.0'
+  title: Order Tracking API
   contact:
     email: slim107@my.bcit.ca
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: application
+    description: Orders tracking from food application
 
 paths:
-  /final_grade:
+  /orders/delivery:
     get:
-      summary: gets a final grade event from history
-      operationId: app.get_final_grade_event
-      description: Gets final grade events from the event store
+      tags:
+        - application
+      summary: Get the deliver order
+      operationId: app.get_deliver_order_tracking
+      description: Gets a new delivery order to the system|
       parameters:
         - name: index
           in: query
-          description: Gets the final grade at the index in the event store
+          description: gets the delivery order at the index in the event store
           schema:
             type: integer
-            example: 92
+            example: 2
       responses:
-        '200':
-          description: Successfully returned a final grade events
+        '201':
+          description: Successfully returned a delivery tracking order event
           content:
             application/json:
               schema:
                 type: object
                 items:
-                  $ref: '#/components/schemas/FinalGradeEvent'
+                  $ref: '#/components/schemas/DeliveryOrderTracking'
         '400':
-          description: Invalid request
+          description: 'invalid request'
           content:
             application/json:
               schema:
@@ -38,7 +46,7 @@ paths:
                   message:
                     type: string
         '404':
-          description: Not Found
+          description: 'Not Found'
           content:
             application/json:
               schema:
@@ -46,29 +54,31 @@ paths:
                 properties:
                   message:
                     type: string
-  /classes:
+  /orders/pickup:
     get:
-      summary: gets a class event from history
-      operationId: app.get_classes_event
-      description: Gets classes event from the event store
+      tags:
+        - application
+      summary: Get the pickup order
+      operationId: app.get_pickup_order_tracking
+      description: Gets a new pickup order to the system
       parameters:
         - name: index
           in: query
-          description: Gets the classes at the index in the event store
+          description: gets the delivery order at the index in the event store
           schema:
             type: integer
-            example: 92
+            example: 100
       responses:
-        '200':
-          description: Successfully returned a classes event
+        '201':
+          description: Successfully returned a delivery tracking order event
           content:
             application/json:
               schema:
                 type: object
                 items:
-                  $ref: '#/components/schemas/ClassesEvent'
+                  $ref: '#/components/schemas/PickupOrderTracking'
         '400':
-          description: Invalid request
+          description: 'invalid request'
           content:
             application/json:
               schema:
@@ -77,67 +87,95 @@ paths:
                   message:
                     type: string
         '404':
-          description: Not Found
-
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:
-    FinalGradeEvent:
+    DeliveryOrderTracking:
+      required:
+        - id
+        - total
+        - deliveryOrderInfo
+        - items
+        - orderTime
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        total:
+          type: number
+          example: 15.32
+        deliveryOrderInfo:
+          $ref: '#/components/schemas/DeliveryOrderInfo'
+        items:
+          type: string
+          example: 'noodle, rice'
+        orderTime:
+          type: string
+          format: date-time
+          example: '2021-08-29 09:12:33'
       type: object
+
+    PickupOrderTracking:
       required:
-        - fullname
-        - username
-        - password
-        - final_grade
-        - timestamp
+        - id
+        - total
+        - pickupOrderInfo
+        - items
+        - orderTime
       properties:
-        fullname:
+        id:
           type: string
-          example: john kim
-        username:
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        total:
+          type: number
+          example: 50.21
+        pickupOrderInfo:
+          $ref: '#/components/schemas/PickupOrderInfo'
+        items:
           type: string
-          example: john123123
-        password:
+          example: 'noodle, rice'
+        orderTime:
           type: string
-          example: q1w2e3r4
-        final_grade:
+          format: date-time
+          example: '2021-08-29 09:12:33'
+      type: object
+
+    DeliveryOrderInfo:
+      required:
+        - driverName
+        - remainingTime
+        - address
+      properties:
+        driverName:
+          type: string
+          example: 'Tom'
+        remainingTime:
           type: integer
-          example: 95
-        timestamp:
+          example: 20
+        address:
           type: string
-          format: date-time
-          example: 2016-08-29T09:12:33.001
-    ClassesEvent:
+          example: '555 Seymour St'
+      type: object
+
+    PickupOrderInfo:
       required:
-        - fullname
-        - username
-        - password
-        - classes
+        - pickupPlace
+        - cookReady
       properties:
-        fullname:
+        pickupPlace:
           type: string
-          example: Sean lim
-        username:
-          type: string
-          example: sushi123
-        password:
-          type: string
-          example: 123123qwer
-        classes:
-          $ref: '#/components/schemas/Classes'
-        timestamp:
-          type: string
-          format: date-time
-          example: 2016-08-29T09:12:33.001
-    Classes:
-      required:
-        - math
-        - python
-      properties:
-        math:
-          type: string
-          example: MATH3800
-        python:
-          type: string
-          example: ACIT2512
+          example: 'Mcdonald'
+        cookReady:
+          type: integer
+          example: 10
       type: object
