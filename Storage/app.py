@@ -108,14 +108,12 @@ def get_student_account(start_timestamp, end_timestamp):
     """ Gets new student account events after the timestamp """
     session = DB_SESSION()
 
-    start_timestamp_datetime = datetime.datetime.strptime(
-        start_timestamp, "%Y-%m-%dT%H:%M:%S")
-    end_timestamp_datetime = datetime.datetime.strptime(
-        end_timestamp, "%Y-%m-%dT%H:%M:%S")
+    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
+    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
     students = session.query(StudentAccount).filter(
-        and_(StudentAccount.date_created >= start_timestamp_datetime,
-             StudentAccount.date_created < end_timestamp_datetime))
+        and_(StudentAccount.start_timestamp >= start_timestamp_datetime,
+             StudentAccount.start_timestamp < end_timestamp_datetime))
 
     results_list = []
     for student in students:
@@ -131,17 +129,16 @@ def get_student_account(start_timestamp, end_timestamp):
 def get_instructor_account(start_timestamp, end_timestamp):
     """ Gets new instructor account events after the timestamp """
     session = DB_SESSION()
-    start_timestamp_datetime = datetime.datetime.strptime(
-        start_timestamp, "%Y-%m-%dT%H:%M:%S")
-    end_timestamp_datetime = datetime.datetime.strptime(
-        end_timestamp, "%Y-%m-%dT%H:%M:%S")
+    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
+    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
-    students = session.query(InstructorAccount).filter(
-        and_(InstructorAccount.date_created >= start_timestamp_datetime,
-             InstructorAccount.date_created < end_timestamp_datetime))
+    instructors = session.query(InstructorAccount).filter(
+        and_(InstructorAccount.start_timestamp >= start_timestamp_datetime,
+             InstructorAccount.start_timestamp < end_timestamp_datetime))
+
 
     results_list = []
-    for instructor in students:
+    for instructor in instructors:
         results_list.append(instructor.to_dict())
         session.close()
 

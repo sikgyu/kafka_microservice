@@ -105,7 +105,7 @@ services:
       - /home/azureuser/config/audit_log:/config
       - /home/azureuser/logs:/logs
   dashboard-ui:
-    image: dashboard:latest
+    image: dashboard-ui:latest
     ports:
       - "3000"
     networks:

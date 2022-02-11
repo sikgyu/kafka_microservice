@@ -69,14 +69,13 @@ def populate_stats():
     """ Periodically update stats """
     logger.info("Start Periodic Processing")
     if os.path.isfile(app_config["datastore"]["filename"]):
-        with open('data.json', 'r') as f:
+        with open(app_config["datastore"]["filename"]) as f:
             data_config = json.load(f)
-        logger.info("number of score: {}".format(
-            data_config['num_score_events']))
+        logger.info("number of score: {}".format(data_config['num_score_events']))
         logger.info("highest score: {}".format(data_config['highest_score']))
         logger.info("lowest score: {}".format(data_config['lowest_score']))
     else:
-        with open('data.json', 'w', encoding='utf-8') as f:
+        with open(app_config["datastore"]["filename"], 'w', encoding='utf-8') as f:
             data_config = {
                 "num_score_events": 0,
                 "highest_score": 0,
@@ -85,24 +84,20 @@ def populate_stats():
                 "last_updated": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             }
             json.dump(data_config, f, ensure_ascii=False, indent=4)
-        logger.info("number of score: {}".format(
-            data_config['num_score_events']))
+        logger.info("number of score: {}".format(data_config['num_score_events']))
         logger.info("highest score: {}".format(data_config['highest_score']))
         logger.info("lowest score: {}".format(data_config['lowest_score']))
-    logger.info("Current datetime : {}".format(
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    logger.info("Current datetime : {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
     last_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     if "last_updated" in data_config:
         last_updated = data_config["last_updated"]
-    with open('data.json', 'w', encoding='utf-8') as f:
+    with open(app_config['datastore']['filename'], 'w', encoding='utf-8') as f:
         json.dump(data_config, f, ensure_ascii=False, indent=4)
 
     current_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    instructor_res = requests.get(app_config["eventstore"][
-        "url"] + "/account/instructor?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
-    student_res = requests.get(app_config["eventstore"][
-        "url"] + "/account/student?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
+    instructor_res = requests.get(app_config["eventstore"]["url"] + "/account/instructor?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
+    student_res = requests.get(app_config["eventstore"]["url"] + "/account/student?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
 
     if instructor_res.status_code == 200:
         logger.info("instructor event has been received successfully")
