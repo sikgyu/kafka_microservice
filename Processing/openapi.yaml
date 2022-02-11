@@ -1,27 +1,27 @@
 openapi: 3.0.0
 info:
   description: This API provides event stats
-  version: "1.0.0"
+  version: '1.0.0'
   title: Stats API
   contact:
-    email: slim107@my.bcit.ca
-
+    email: hhyungmin@my.bcit.ca
 
 paths:
   /stats:
     get:
       summary: Gets the event stats
       operationId: app.get_stats
-      description: Gets a new student and instructor account processed statistics
+      description: Gets delivery order and pickup order processsed statistics
       responses:
         '200':
-          description: Successfully returned a list of student and instrcutor account events
+          description: Successfully returned a list of delivery orders and pickup orders
           content:
             application/json:
               schema:
                 type: object
                 items:
-                  $ref: '#/components/schemas/EventStats'
+                  $ref: '#/components/schemas/ReadingStats'
+
         '400':
           description: Invalid request
           content:
@@ -31,30 +31,31 @@ paths:
                 properties:
                   message:
                     type: string
+
 components:
   schemas:
-    EventStats:
+    ReadingStats:
       required:
-        - num_score_events
-        - highest_score
-        - lowest_score
-        - num_in_events
+        - num_delivery_orders
+        - num_pickup_orders
+        - max_total
+        - num_drivers
         - last_updated
       properties:
-        num_score_events:
-          type: integer
-          example: 1000
-        highest_score:
-          type: integer
-          example: 100
-        lowest_score:
+        num_delivery_orders:
           type: integer
           example: 500
-        num_in_events:
+        num_pickup_orders:
           type: integer
-          example: 1000
+          example: 200
+        max_total:
+          type: integer
+          example: 10000
+        num_drivers:
+          type: integer
+          example: 500000
         last_updated:
           type: string
           format: date-time
-          example: 2016-08-29T09:12:33.001Z
+          example: '2018-11-18 09:32:36.435350'
       type: object
