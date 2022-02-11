@@ -143,7 +143,7 @@ app = connexion.FlaskApp(__name__, specification_dir='')
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     CORS(app.app)
     app.app.config['CORS_HEADERS'] = 'Content-Type'
-app.add_api("openapi.yml",
+app.add_api("openapi.yaml",
             base_path="/processing",
             strict_validation=True,
             validate_responses=True)

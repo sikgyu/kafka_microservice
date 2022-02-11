@@ -14,42 +14,86 @@ tags:
 
 paths:
   /orders/delivery:
-    post:
+    get:
       tags:
         - application
-      summary: Tracks the deliver order
-      operationId: app.deliver_order_tracking
-      description: Adds a new delivery order to the system|
+      summary: Get the deliver order
+      operationId: app.get_deliver_order_tracking
+      description: Gets a new delivery order to the system|
+      parameters:
+        - name: orderTime
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: '2016-08-29 09:12:33'
+        - name: orderTimeEnd
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: '2016-08-29 09:12:38'
       responses:
         '201':
-          description: item created
+          description: Successfully returned a delivery tracking order event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryOrderTracking'
         '400':
           description: 'invalid input, object invalid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeliveryOrderTracking'
-        description: Tracking item to add
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
   /orders/pickup:
-    post:
+    get:
       tags:
         - application
-      summary: Tracks the pickup order
-      operationId: app.pickup_order_tracking
-      description: Adds a new pickup order to the system|
+      summary: Get the pickup order
+      operationId: app.get_pickup_order_tracking
+      description: Gets a new pickup order to the system
+      parameters:
+        - name: orderTime
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: '2016-08-29 09:12:33'
+        - name: orderTimeEnd
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: '2016-08-29 09:12:38'
       responses:
         '201':
-          description: item created
+          description: Successfully returned a delivery tracking order event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PickupOrderTracking'
         '400':
           description: 'invalid input, object invalid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PickupOrderTracking'
-        description: Tracking item to add
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:
@@ -76,7 +120,7 @@ components:
         orderTime:
           type: string
           format: date-time
-          example: '2021-08-29T09:12:33.001Z'
+          example: '2021-08-29 09:12:33'
       type: object
 
     PickupOrderTracking:
@@ -102,7 +146,7 @@ components:
         orderTime:
           type: string
           format: date-time
-          example: '2021-08-29T09:12:33.001Z'
+          example: '2021-08-29 09:12:33'
       type: object
 
     DeliveryOrderInfo:
