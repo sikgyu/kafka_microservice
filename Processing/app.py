@@ -1,17 +1,16 @@
-import datetime
+import connexion
+from connexion import NoContent
+
+import requests
+from datetime import datetime, timedelta
+import yaml
 import logging
 import logging.config
 import os
-
-import connexion
 import json
-from os import path
-import requests
-import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_cors import CORS, cross_origin
-
-from connexion import NoContent
+import os
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     print("In Test Environment")
@@ -22,10 +21,29 @@ else:
     app_conf_file = "app_conf.yml"
     log_conf_file = "log_conf.yml"
 
+
 with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-# External Logging Configuration
+
+class Total:
+    def __init__(self, total):
+        self.total = total
+
+    def add_to_total(self, sum):
+        self.total = self.total + sum
+        return self.total
+
+
+total = Total(0)
+stats = {}
+
+
+def write_to_file(stats):
+    with open(app_config['datastore']['filename'], "w") as f:
+        json.dump(stats, f, indent=2)
+
+
 with open(log_conf_file, 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
@@ -37,92 +55,80 @@ logger.info("Log Conf File: %s" % log_conf_file)
 
 
 def get_stats():
-    logger.info("get stats request has been started")
-    stats = {}
-    if os.path.isfile(app_config["datastore"]["filename"]):
-        f = open(app_config["datastore"]["filename"])
-        data = f.read()
-        f.close()
-
-        data_stats = json.loads(data)
-
-        if "num_score_events" in data_stats:
-            stats["num_score_events"] = data_stats["num_score_events"]
-        if "highest_score" in data_stats:
-            stats["highest_score"] = data_stats["highest_score"]
-        if "lowest_score" in data_stats:
-            stats["lowest_score"] = data_stats["lowest_score"]
-        if "num_in_events" in data_stats:
-            stats["num_in_events"] = data_stats["num_in_events"]
-        if "last_updated" in data_stats:
-            stats["last_updated"] = data_stats["last_updated"]
-
-        logger.info("Found valid stats")
-        logger.debug(stats)
+    """ Receives a order stats """
+    logger.info("Starting request...")
+    if (os.path.isfile(app_config['datastore']['filename'])):
+        with open(app_config['datastore']['filename']) as f:
+            data = f.read()
+            py_data = json.loads(data)
+            stats = py_data
     else:
-        return logger.error("Statistics Do Not Exist"), 404
+        return "Statictics do not exist", 403
+
+    logger.debug(stats)
+    logger.info("Ending request...")
 
     return stats, 200
 
 
 def populate_stats():
     """ Periodically update stats """
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     logger.info("Start Periodic Processing")
-    if os.path.isfile(app_config["datastore"]["filename"]):
-        with open(app_config["datastore"]["filename"]) as f:
-            data_config = json.load(f)
-        logger.info("number of score: {}".format(data_config['num_score_events']))
-        logger.info("highest score: {}".format(data_config['highest_score']))
-        logger.info("lowest score: {}".format(data_config['lowest_score']))
+    logger.info("testing loggin")
+    if (os.path.isfile(app_config['datastore']['filename'])):
+        with open(app_config['datastore']['filename']) as f:
+            data = f.read()
+            py_data = json.loads(data)
+            stats = py_data
     else:
-        with open(app_config["datastore"]["filename"], 'w', encoding='utf-8') as f:
-            data_config = {
-                "num_score_events": 0,
-                "highest_score": 0,
-                "lowest_score": 100,
-                "num_in_events": 0,
-                "last_updated": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            }
-            json.dump(data_config, f, ensure_ascii=False, indent=4)
-        logger.info("number of score: {}".format(data_config['num_score_events']))
-        logger.info("highest score: {}".format(data_config['highest_score']))
-        logger.info("lowest score: {}".format(data_config['lowest_score']))
-    logger.info("Current datetime : {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        stats = {
+            "num_delivery_orders": 0,
+            "num_pickup_orders": 0,
+            "max_total": 0,
+            "num_drivers": 0,
+            "last_updated": current_time,
+        }
 
-    last_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    if "last_updated" in data_config:
-        last_updated = data_config["last_updated"]
-    with open(app_config['datastore']['filename'], 'w', encoding='utf-8') as f:
-        json.dump(data_config, f, ensure_ascii=False, indent=4)
+    # end_time = (datetime.now()+timedelta(seconds=5)
+    #             ).strftime("%Y-%m-%d %H:%M:%S")
+    print(stats)
+    payload = {'orderTime': stats['last_updated'],
+               'orderTimeEnd': current_time}
+    d_url = f"{app_config['eventstore']['url']}/orders/delivery"
+    response_delivery = requests.get(d_url, params=payload)
 
-    current_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    instructor_res = requests.get(app_config["eventstore"]["url"] + "/account/instructor?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
-    student_res = requests.get(app_config["eventstore"]["url"] + "/account/student?start_timestamp=" + last_updated + "&end_timestamp=" + current_updated)
-
-    if instructor_res.status_code == 200:
-        logger.info("instructor event has been received successfully")
-        data_config["num_in_events"] += len(instructor_res.json())
+    if (response_delivery.status_code == 200):
+        logger.info(
+            f"number of deliveries: {len(response_delivery.json())} reponse 1 ")
     else:
-        logger.error("receiving event error")
+        logger.info("400 Error from Get Delivery ")
+        return 400
 
-    if student_res.status_code == 200:
-        logger.info("student event has been received successfully")
-        data_config["num_score_events"] += len(student_res.json())
-        for i in student_res.json():
-            if data_config["highest_score"] < i["final_grade"]:
-                data_config["highest_score"] = i["final_grade"]
+    delivery_data = response_delivery.json()
 
-        for i in student_res.json():
-            if data_config["lowest_score"] > i["final_grade"]:
-                data_config["lowest_score"] = i["final_grade"]
+    p_url = f"{app_config['eventstore']['url']}/orders/pickup"
+    response_pickup = requests.get(p_url, params=payload)
+
+    if (response_pickup.status_code == 200):
+        logger.info(f"number of pickups: {len(response_pickup.json())}")
     else:
-        logger.error("receiving events failed")
+        logger.info("400 Error from Get Pickup")
+        return 400
 
-    data_config["last_updated"] = current_updated
-    f = open(app_config["datastore"]["filename"], "w")
-    f.write(json.dumps(data_config, indent=4))
-    f.close()
-    logger.debug("processing has been done")
+    pickup_data = response_pickup.json()
+
+    stats = {
+        "num_delivery_orders": len(delivery_data) + stats['num_delivery_orders'],
+        "num_pickup_orders": len(pickup_data) + stats['num_pickup_orders'],
+        "max_total_delivery": total.add_to_total(sum([int(delivery["total"]) for delivery in delivery_data])),
+        "num_drivers": list(set([delivery["deliveryOrderInfo"]["driverName"] for delivery in delivery_data])),
+        "last_updated": current_time
+    }
+    write_to_file(stats)
+    logger.debug(stats)
+
+    logger.info("End Periodic Processing")
 
 
 def init_scheduler():
@@ -134,12 +140,13 @@ def init_scheduler():
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')
-app.add_api("openapi.yaml", base_path="/processing", strict_validation=True, validate_responses=True)
-
-if "TARGET_ENV" not in os.environ or os.environ["TARGET_ENV"] != "test":
+if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     CORS(app.app)
-    app.app.config['CORS_HEADERS']='Content-Type'
-
+    app.app.config['CORS_HEADERS'] = 'Content-Type'
+app.add_api("openapi.yml",
+            base_path="/processing",
+            strict_validation=True,
+            validate_responses=True)
 
 if __name__ == "__main__":
     init_scheduler()

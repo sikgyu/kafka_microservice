@@ -4,7 +4,7 @@ password="password", database="events")
 db_cursor = db_conn.cursor()
 
 db_cursor.execute('''
- DROP TABLE student_account, instructor_account
+ DROP TABLE delivery_order, pickup_order
 ''')
 db_conn.commit()
 db_conn.close()

@@ -1,110 +1,136 @@
 openapi: 3.0.0
 info:
-  description: This API receives User information when the user created new account
-  version: "1.0.0"
-  title: User account registration API
+  description: This API receives deliver and pick up orders from an application
+  version: '1.0.0'
+  title: Order Tracking API
   contact:
-    email: slim107@my.bcit.ca
+    email: hhyungmin@my.bcit.ca
   license:
     name: Apache 2.0
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 tags:
-  - name: user account
-    description: user created new account as student or instructor
-paths:
-  /account/student:
-    post:
-      tags:
-        - user account
-      summary: user created as student
-      operationId: app.student_account
-      description: Adds a new student account information to the system
-      responses:
-        "201":
-          description: student account created
-        "400":
-          description: "invalid input, object invalid"
-        # '409':
-        #   description: an existing item already exists
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Student"
-        description: account to add
+  - name: application
+    description: Orders tracking from food application
 
-  /account/instructor:
+paths:
+  /orders/delivery:
     post:
       tags:
-        - user account
-      summary: account created as instructor
-      operationId: app.instructor_account
-      description: Adds an instructor account information to the system
+        - application
+      summary: Tracks the deliver order
+      operationId: app.deliver_order_tracking
+      description: Adds a new delivery order to the system|
       responses:
-        "201":
-          description: instructor account created
-        "400":
-          description: "invalid input, object invalid"
-        # '409':
-        #   description: an existing item already exists
+        '201':
+          description: item created
+        '400':
+          description: 'invalid input, object invalid'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Instructor"
-        description: account to add
+              $ref: '#/components/schemas/DeliveryOrderTracking'
+        description: Tracking item to add
+
+  /orders/pickup:
+    post:
+      tags:
+        - application
+      summary: Tracks the pickup order
+      operationId: app.pickup_order_tracking
+      description: Adds a new pickup order to the system|
+      responses:
+        '201':
+          description: item created
+        '400':
+          description: 'invalid input, object invalid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupOrderTracking'
+        description: Tracking item to add
 
 components:
   schemas:
-    Student:
+    DeliveryOrderTracking:
+      required:
+        - id
+        - total
+        - deliveryOrderInfo
+        - items
+        - orderTime
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        total:
+          type: number
+          example: 15.32
+        deliveryOrderInfo:
+          $ref: '#/components/schemas/DeliveryOrderInfo'
+        items:
+          type: string
+          example: 'noodle, rice'
+        orderTime:
+          type: string
+          format: date-time
+          example: '2021-08-29T09:12:33.001Z'
       type: object
+
+    PickupOrderTracking:
       required:
-        - fullname
-        - username
-        - password
-        - final_grade
+        - id
+        - total
+        - pickupOrderInfo
+        - items
+        - orderTime
       properties:
-        fullname:
+        id:
           type: string
-          example: john kim
-        username:
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        total:
+          type: number
+          example: 50.21
+        pickupOrderInfo:
+          $ref: '#/components/schemas/PickupOrderInfo'
+        items:
           type: string
-          example: john123123
-        password:
+          example: 'noodle, rice'
+        orderTime:
           type: string
-          example: q1w2e3r4
-        final_grade:
+          format: date-time
+          example: '2021-08-29T09:12:33.001Z'
+      type: object
+
+    DeliveryOrderInfo:
+      required:
+        - driverName
+        - remainingTime
+        - address
+      properties:
+        driverName:
+          type: string
+          example: 'Tom'
+        remainingTime:
           type: integer
-          example: 95
+          example: 20
+        address:
+          type: string
+          example: '555 Seymour St'
+      type: object
 
-    Instructor:
+    PickupOrderInfo:
       required:
-        - fullname
-        - username
-        - password
-        - classes
+        - pickupPlace
+        - cookReady
       properties:
-        fullname:
+        pickupPlace:
           type: string
-          example: Sean lim
-        username:
-          type: string
-          example: sushi123
-        password:
-          type: string
-          example: 123123qwer
-        classes:
-          $ref: "#/components/schemas/Classes"
-
-    Classes:
-      required:
-        - math
-        - python
-      properties:
-        math:
-          type: string
-          example: MATH3800
-        python:
-          type: string
-          example: ACIT2512
+          example: 'Mcdonald'
+        cookReady:
+          type: integer
+          example: 10
       type: object
