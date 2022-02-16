@@ -55,6 +55,7 @@ class CreateKafka:
                 client = KafkaClient(
                     hosts=f"{self._kafka_hostname}:{self._kafka_port}")
                 isConnected = True
+                logger.info(f"Kafka is successfully connected.")
             except Exception as err:
                 if err:
                     logger.error("CONNECTION FAILED")

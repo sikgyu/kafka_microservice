@@ -144,6 +144,7 @@ def process_messages():
     """ Process event messages """
     hostname = "%s:%d" % (
         app_config["events"]["hostname"], app_config["events"]["port"])
+    logger.info(f"processing messages from {hostname}.")
     client = None
     isConnected = False
     current_retry_count = 0
