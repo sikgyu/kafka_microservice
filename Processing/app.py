@@ -92,7 +92,6 @@ def populate_stats():
 
     # end_time = (datetime.now()+timedelta(seconds=5)
     #             ).strftime("%Y-%m-%d %H:%M:%S")
-    print(stats)
     payload = {'orderTime': stats['last_updated'],
                'orderTimeEnd': current_time}
     d_url = f"{app_config['eventstore']['url']}/orders/delivery"

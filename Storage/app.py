@@ -133,11 +133,6 @@ def get_pickup_order_tracking(orderTime, orderTimeEnd):
     return results_list, 200
 
 
-app = connexion.FlaskApp(__name__, specification_dir='')
-app.add_api("openapi.yaml",
-            base_path="/storage",
-            strict_validation=True,
-            validate_responses=True)
 
 
 def process_messages():
@@ -145,6 +140,7 @@ def process_messages():
     hostname = "%s:%d" % (
         app_config["events"]["hostname"], app_config["events"]["port"])
     logger.info(f"processing messages from {hostname}.")
+    
     client = None
     isConnected = False
     current_retry_count = 0
@@ -169,9 +165,12 @@ def process_messages():
     # Create a consume on a consumer group, that only reads new messages
     # (uncommitted messages) when the service re-starts (i.e., it doesn't
     # read all the old messages from the history in the message queue).
-    consumer = topic.get_simple_consumer(consumer_group='events',
-                                         reset_offset_on_start=False,
-                                         auto_offset_reset=OffsetType.LATEST)
+    consumer = topic.get_balanced_consumer(consumer_group=b'event_group',
+                                            reset_offset_on_start=False,
+                                            zookeeper_connect='zookeeper:2181',
+                                            auto_commit_enable=True,
+                                            auto_commit_interval_ms=100)
+                                            # auto_offset_reset=OffsetType.LATEST)
     logger.info(f"consumer info : {consumer} ")
     logger.info(f"topic info : {topic} ")
     # This is blocking - it will wait for a new message
@@ -189,6 +188,11 @@ def process_messages():
         # Commit the new message as being read
         consumer.commit_offsets()
 
+app = connexion.FlaskApp(__name__, specification_dir='')
+app.add_api("openapi.yaml",
+            base_path="/storage",
+            strict_validation=True,
+            validate_responses=True)
 
 if __name__ == "__main__":
     t1 = Thread(target=process_messages)
