@@ -171,6 +171,8 @@ def process_messages():
     consumer = topic.get_simple_consumer(consumer_group='events',
                                          reset_offset_on_start=False,
                                          auto_offset_reset=OffsetType.LATEST)
+    logger.info(f"consumer info : {consumer} ")
+    logger.info(f"topic info : {topic} ")
     # This is blocking - it will wait for a new message
     for msg in consumer:
         msg_str = msg.value.decode('utf-8')

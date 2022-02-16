@@ -1,0 +1,6 @@
+2022-02-16 09:34:13,478 - basicLogger - INFO - Try Connecting to Kafka... number of tries: 0
+2022-02-16 09:34:13,888 - basicLogger - INFO - App Conf File: app_conf.yml
+2022-02-16 09:34:13,888 - basicLogger - INFO - Log Conf File: log_conf.yml
+2022-02-16 09:34:13,933 - basicLogger - INFO - Try Connecting to Kafka... number of tries: 0
+2022-02-16 09:34:14,292 - basicLogger - INFO - App Conf File: app_conf.yml
+2022-02-16 09:34:14,293 - basicLogger - INFO - Log Conf File: log_conf.yml

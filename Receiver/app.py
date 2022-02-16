@@ -85,7 +85,7 @@ producer = kafka.topic.get_sync_producer()
 
 logger.info("App Conf File: %s" % app_conf_file)
 logger.info("Log Conf File: %s" % log_conf_file)
-
+logger.info("Kafka: %s" % kafka )
 
 def deliver_order_tracking(body):
     """ Receives a delivery order """
@@ -107,6 +107,8 @@ def deliver_order_tracking(body):
 
     logger.info(
         f"Returned event delivery {body['id']} 201")
+    logger.info(f"The message from delivery : {msg_str}")
+
 
     return NoContent, 201
 
@@ -133,6 +135,7 @@ def pickup_order_tracking(body):
 
     logger.info(
         f"Returned event pickup {body['id']} 201")
+    logger.info(f"The message from pickup_order : {msg_str}")
     return NoContent, 201
 
 

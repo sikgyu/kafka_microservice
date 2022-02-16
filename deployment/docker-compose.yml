@@ -53,6 +53,7 @@ services:
       - my-db:/var/lib/mysql
   receiver:
     image: receiver:latest
+    restart: always
     ports:
       - "8080"
     networks:
@@ -66,6 +67,7 @@ services:
       - "kafka"
   storage:
     image: storage:latest
+    restart: always
     ports:
       - "8090"
     networks:
@@ -79,6 +81,7 @@ services:
       - /home/azureuser/logs:/logs
   processing:
     image: processing:latest
+    restart: always
     ports:
       - "8100"
     networks:
@@ -93,6 +96,7 @@ services:
       - processing-db:/data
   audit_log:
     image: audit_log:latest
+    restart: always
     ports:
       - "8110"
     networks:
@@ -116,6 +120,7 @@ services:
   nginx:
     image: nginx:latest
     # Connects the conf file of the container to the conf file in our folder
+    restart: always
     volumes:
       - /home/azureuser/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       # It will start up the nginx only when all api containers have started
