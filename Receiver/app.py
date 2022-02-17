@@ -61,8 +61,8 @@ while count < retry:
         producer = topic.get_sync_producer()
         break
     except:
-        logger.error("Lost connection. (%d)" % count)
-        time.sleep(app_config["events"]["period_sec"])
+        logger.error("Lost connection. (%d)" % count)   
+        time.sleep(app_config["retries"]["sleep"])
         count += 1
 
 
