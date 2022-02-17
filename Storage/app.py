@@ -151,21 +151,19 @@ def process_messages():
     current_retry_count = 0
     retry_count = app_config["retries"]["number"]
     sleep_time = app_config["retries"]["sleep"]
-    while not isConnected and current_retry_count < retry_count:
+
+    while current_retry_count < retry_count:
         try:
             logger.info(
                 f"Try Connecting to Kafka... number of tries: {current_retry_count}")
             client = KafkaClient(hosts=hostname)
+            topic = client.topics[str.encode(app_config["events"]["topic"])]
             isConnected = True
-        except Exception as err:
-            if err:
-                logger.error("CONNECTION FAILED")
-                time.sleep(sleep_time)
-                current_retry_count += 1
-    if not isConnected:
-        logger.critical("CANNOT CONNECT TO KAFKA. EXITING...")
-        sys.exit(0)
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
+            logger.info(f"Connection: {isConnected}")
+        except Exception as e:
+            current_retry_count += 1
+            logger.error("CONNECTION FAILED")
+            time.sleep(sleep_time)
 
     # Create a consume on a consumer group, that only reads new messages
     # (uncommitted messages) when the service re-starts (i.e., it doesn't
@@ -176,7 +174,7 @@ def process_messages():
                                             auto_commit_enable=True,
                                             auto_commit_interval_ms=100)
                                             # auto_offset_reset=OffsetType.LATEST)
-                                            
+
     logger.info(f"consumer info : {consumer} ")
     logger.info(f"topic info : {topic} ")
     # This is blocking - it will wait for a new message
