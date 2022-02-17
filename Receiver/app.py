@@ -33,41 +33,6 @@ else:
     app_conf_file = "app_conf.yml"
     log_conf_file = "log_conf.yml"
 
-
-class CreateKafka:
-    def __init__(self, kafka_hostname, kafka_port, kafka_topic):
-        self._kafka_hostname = kafka_hostname
-        self._kafka_port = kafka_port
-        self._k_topic = kafka_topic
-
-    @property
-    def topic(self):
-        client = None
-        isConnected = False
-        current_retry_count = 0
-        retry_count = app_config["retries"]["number"]
-        sleep_time = app_config["retries"]["sleep"]
-
-        while not isConnected and current_retry_count < retry_count:
-            try:
-                logger.info(
-                    f"Try Connecting to Kafka... number of tries: {current_retry_count}")
-                client = KafkaClient(
-                    hosts=f"{self._kafka_hostname}:{self._kafka_port}")
-                isConnected = True
-                logger.info(f"Kafka is successfully connected.")
-            except Exception as err:
-                if err:
-                    logger.error("CONNECTION FAILED")
-                    time.sleep(sleep_time)
-                    current_retry_count += 1
-        if not isConnected:
-            logger.critical("CANNOT CONNECT TO KAFKA. EXITING...")
-            sys.exit(0)
-        topic = client.topics[str.encode(self._k_topic)]
-        return topic
-
-
 with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
 
@@ -78,15 +43,28 @@ with open(log_conf_file, 'r') as f:
 
 logger = logging.getLogger('basicLogger')
 
-k_hostname = app_config['events']['hostname']
-k_port = app_config['events']['port']
-k_topic = app_config['events']['topic']
-kafka = CreateKafka(k_hostname, k_port, k_topic)
-producer = kafka.topic.get_sync_producer()
-
 logger.info("App Conf File: %s" % app_conf_file)
 logger.info("Log Conf File: %s" % log_conf_file)
-logger.info("Kafka: %s" % kafka )
+
+count = 0
+retry = app_config["retries"]["number"]
+sleep_time = app_config["retries"]["sleep"]
+
+while count < retry:
+    try:
+        logger.info("Connecting...")
+        hostname = "%s: %d" % (
+            app_config["events"]["hostname"], app_config["events"]["port"])
+        client = KafkaClient(hosts=hostname)
+        topic = client.topics[str.encode(app_config["events"]["topic"])]
+
+        producer = topic.get_sync_producer()
+        break
+    except:
+        logger.error("Lost connection. (%d)" % count)
+        time.sleep(app_config["events"]["period_sec"])
+        count += 1
+
 
 def deliver_order_tracking(body):
     """ Receives a delivery order """

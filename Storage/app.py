@@ -128,9 +128,11 @@ def get_pickup_order_tracking(orderTime, orderTimeEnd):
         results_list.append(reading.to_dict())
     session.close()
 
-    logger.info(f"ordertime_datetime: {ordertime_datetime}")
-    logger.info(f"ordertime_end {orderTime_datetime_end}")
-    logger.info(f"PickupOrder.ordertime : {PickupOrder.orderTime}") 
+    logger.info(f"ordertime_datetime: {ordertime_datetime}") # 현재시간 
+    logger.info(f"ordertime_end {orderTime_datetime_end}") # 현재시간 + 5초
+    print(PickupOrder.orderTime)
+    print(ordertime_datetime)
+    print(orderTime)
     logger.info("Query for pickup orders after %s returns %d results" %
                 (orderTime, len(results_list)))
     return results_list, 200
@@ -174,6 +176,7 @@ def process_messages():
                                             auto_commit_enable=True,
                                             auto_commit_interval_ms=100)
                                             # auto_offset_reset=OffsetType.LATEST)
+                                            
     logger.info(f"consumer info : {consumer} ")
     logger.info(f"topic info : {topic} ")
     # This is blocking - it will wait for a new message
