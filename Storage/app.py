@@ -118,7 +118,7 @@ def get_pickup_order_tracking(orderTime, orderTimeEnd):
     session = DB_SESSION()
     ordertime_datetime = datetime.datetime.strptime(
         orderTime, "%Y-%m-%d %H:%M:%S")
-    orderTime_datetime_end = datetime.datetime.strptime(
+    orderTime_datetime_end = datetime.datetime.strptime( 
         orderTimeEnd, "%Y-%m-%d %H:%M:%S")
 
     readings = session.query(PickupOrder).filter(
@@ -128,6 +128,9 @@ def get_pickup_order_tracking(orderTime, orderTimeEnd):
         results_list.append(reading.to_dict())
     session.close()
 
+    logger.info(f"ordertime_datetime: {ordertime_datetime}")
+    logger.info(f"ordertime_end {orderTime_datetime_end}")
+    logger.info(f"PickupOrder.ordertime : {PickupOrder.orderTime}") 
     logger.info("Query for pickup orders after %s returns %d results" %
                 (orderTime, len(results_list)))
     return results_list, 200
@@ -175,9 +178,9 @@ def process_messages():
     logger.info(f"topic info : {topic} ")
     # This is blocking - it will wait for a new message
     for msg in consumer:
+        logger.info(f"just got MESSAGE: {msg}")
         msg_str = msg.value.decode('utf-8')
         msg = json.loads(msg_str)
-        logger.info("Message: %s" % msg)
         payload = msg["payload"]
         if msg["type"] == "delivery_order":  # Change this to your event type
             # Store the event1 (i.e., the payload) to the DB
